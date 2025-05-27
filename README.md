@@ -1,4 +1,4 @@
-# Bookshelf Enchanting Extended Range (BEER)
+# Bookshelf Extended Enchanting Range (BEER)
 
 Are you tired of the age-old struggle of cramming all your bookshelves within a measly two blocks of your enchanting table? Does your grand library feel wasted, its shelves ignored by the arcane arts?
 
