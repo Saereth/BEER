@@ -1,17 +1,19 @@
 package com.breakinblocks.beer.mixin;
 
 import net.minecraft.core.BlockPos;
-import org.spongepowered.asm.mixin.*;
-import net.minecraft.world.level.block.EnchantingTableBlock;
+import net.minecraft.world.level.block.EnchantmentTableBlock;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-
-@Mixin(EnchantingTableBlock.class)
-public class EnchantingTableMixin {
+@Mixin(EnchantmentTableBlock.class)
+public class EnchantmentTableMixin {
     @Shadow @Final @Mutable
     public static List<BlockPos> BOOKSHELF_OFFSETS;
 
@@ -22,6 +24,4 @@ public class EnchantingTableMixin {
                 .map(BlockPos::immutable)
                 .toList();
     }
-
-
 }

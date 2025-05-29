@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "beer.refmap.json",
   "mixins": [
-    "EnchantingTableMixin"
+    "EnchantmentTableMixin"
   ],
   "client": [
   ],
