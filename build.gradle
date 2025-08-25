@@ -10,6 +10,14 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    maven {
+        // Shadows
+        url "https://maven.shadowsoffire.dev/releases"
+        content {
+            includeGroup "dev.shadowsoffire"
+            includeGroup "snownee.jade"
+        }
+    }
 }
 
 base {
@@ -96,6 +104,9 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 
 dependencies {
+
+    runtimeOnly "snownee.jade:Jade-NeoForge:${minecraft_version}-${jadeVersion}"
+    compileOnly "snownee.jade:Jade-NeoForge:${minecraft_version}-${jadeVersion}"
     // Example mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
