@@ -14,9 +14,6 @@ public class TooltipHandler {
 
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
-        if (event.getItemStack().getItem() == Items.ENCHANTING_TABLE) {
-            event.getToolTip().add(Component.translatable("tooltip.beer.enchanting_table.range", 
-                Config.rangeX, Config.rangeY, Config.rangeZ).withStyle(ChatFormatting.GRAY));
-        }
+
     }
 }
