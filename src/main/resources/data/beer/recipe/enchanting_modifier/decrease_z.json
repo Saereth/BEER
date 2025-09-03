@@ -1,0 +1,12 @@
+{
+  "type": "beer:enchanting_modifier",
+  "mainhand_input": {
+    "item": "minecraft:glowstone_dust"
+  },
+  "offhand_input": {
+    "item": "minecraft:quartz"
+  },
+  "effect_key": "-Z Width",
+  "description_key": "beer.jei.modifier.z_width.description",
+  "modifier_type": "Z_WIDTH"
+}

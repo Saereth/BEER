@@ -1,0 +1,9 @@
+{
+  "type": "beer:enchanting_modifier",
+  "mainhand_input": {
+    "item": "minecraft:lapis_lazuli"
+  },
+  "effect_key": "+Y Height",
+  "description_key": "beer.jei.modifier.y_height.description",
+  "modifier_type": "Y_HEIGHT"
+}
