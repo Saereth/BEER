@@ -22,9 +22,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifierRecipeType> {
@@ -43,12 +43,12 @@ public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifi
     }
 
     @Override
-    public RecipeType<EnchantingModifierRecipeType> getRecipeType() {
+    public @NotNull RecipeType<EnchantingModifierRecipeType> getRecipeType() {
         return TYPE;
     }
 
     @Override
-    public Component getTitle() {
+    public @NotNull Component getTitle() {
         return title;
     }
 
@@ -68,18 +68,15 @@ public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifi
     }
 
     @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, EnchantingModifierRecipeType recipe, IFocusGroup focuses) {
-        // Main modifier item slot (matches Apothic Spawners positioning)
+    public void setRecipe(IRecipeLayoutBuilder builder, EnchantingModifierRecipeType recipe, @NotNull IFocusGroup focuses) {
         builder.addSlot(RecipeIngredientRole.INPUT, 11, 11)
                .addIngredients(recipe.getMainhandInput());
 
-        // Offhand slot if present (matches Apothic Spawners positioning)
         if (recipe.getOffhandInput() != Ingredient.EMPTY) {
             builder.addSlot(RecipeIngredientRole.INPUT, 11, 48)
                    .addIngredients(recipe.getOffhandInput());
         }
 
-        // Invisible catalyst and output for the enchanting table
         builder.addInvisibleIngredients(RecipeIngredientRole.CATALYST)
                .addItemStack(new ItemStack(Blocks.ENCHANTING_TABLE));
                
@@ -88,7 +85,7 @@ public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifi
     }
 
     @Override
-    public void draw(EnchantingModifierRecipeType recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics gfx, double mouseX, double mouseY) {
+    public void draw(@NotNull EnchantingModifierRecipeType recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphics gfx, double mouseX, double mouseY) {
         Screen scn = Minecraft.getInstance().screen;
         if(scn == null) return;
 
@@ -143,7 +140,7 @@ public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifi
             tooltips.add(Component.translatable("beer.jei.category.main_hand"));
         }
         // OffHand ? Tooltip
-        left = 0; top = 50; width = 9; height = 12;
+        left = 0; top = 50;
         if (recipe.getOffhandInput() != Ingredient.EMPTY && isHover(mouseX, mouseY, left, top, width, height)) {
             gfx.blit(TEXTURES, -1, 50, 0, 0, 75, 10, 12, 256, 256);
             tooltips.add(Component.translatable("beer.jei.category.off_hand"));

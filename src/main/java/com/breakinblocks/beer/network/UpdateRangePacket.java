@@ -7,7 +7,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
 public record UpdateRangePacket(BlockPos pos, int rangeX, int rangeY, int rangeZ) implements CustomPacketPayload {
     
@@ -27,7 +29,7 @@ public record UpdateRangePacket(BlockPos pos, int rangeX, int rangeY, int rangeZ
         );
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
+    public @NotNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
 
@@ -54,11 +56,11 @@ public record UpdateRangePacket(BlockPos pos, int rangeX, int rangeY, int rangeZ
         });
     }
     
-    private static boolean isValidContext(net.minecraft.world.entity.player.Player player) {
-        return player != null && player.level() != null;
+    private static boolean isValidContext(Player player) {
+        return player != null;
     }
     
-    private static boolean isPlayerInRange(net.minecraft.world.entity.player.Player player, BlockPos pos) {
+    private static boolean isPlayerInRange(Player player, BlockPos pos) {
         double distance = player.distanceToSqr(
             pos.getX() + BLOCK_CENTER_OFFSET,
             pos.getY() + BLOCK_CENTER_OFFSET,
@@ -67,7 +69,7 @@ public record UpdateRangePacket(BlockPos pos, int rangeX, int rangeY, int rangeZ
         return distance <= MAX_INTERACTION_DISTANCE_SQ;
     }
     
-    private static void updateRangeData(UpdateRangePacket packet, net.minecraft.world.entity.player.Player player) {
+    private static void updateRangeData(UpdateRangePacket packet, Player player) {
         EnchantingTableDataUtil.setRanges(player.level(), packet.pos(), packet.rangeX(), packet.rangeY(), packet.rangeZ());
         
         if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {

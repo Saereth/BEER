@@ -68,7 +68,6 @@ public class EnchantingTablePersistenceHandler {
                     NetworkHandler.sendToAllPlayers(syncPacket);
                     
                 });
-            } else {
             }
         }
     }

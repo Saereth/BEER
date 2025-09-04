@@ -24,17 +24,10 @@ public class BeerDataAttachments {
         }
     );
 
-    private static final StreamCodec<ByteBuf, EnchantingTableRangeData> RANGE_DATA_STREAM_CODEC =
-        StreamCodec.composite(
-            ByteBufCodecs.INT, EnchantingTableRangeData::getItemModifiersX,
-            ByteBufCodecs.INT, EnchantingTableRangeData::getItemModifiersY, 
-            ByteBufCodecs.INT, EnchantingTableRangeData::getItemModifiersZ,
-            EnchantingTableRangeData::new
-        );
 
     public static final Supplier<AttachmentType<EnchantingTableRangeData>> ENCHANTING_TABLE_RANGE = 
         ATTACHMENT_TYPES.register("enchanting_table_range", () -> 
-            AttachmentType.builder(() -> new EnchantingTableRangeData())
+            AttachmentType.builder(EnchantingTableRangeData::new)
                 .serialize(RANGE_DATA_CODEC)
                 .copyOnDeath()
                 .build()

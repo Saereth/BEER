@@ -14,12 +14,12 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class TableStatsMixin {
 
     @Shadow
-    private static boolean canReadStatsFrom(LevelReader level, BlockPos pos, BlockPos offset) {
+    public static boolean canReadStatsFrom(LevelReader level, BlockPos pos, BlockPos offset) {
         throw new AssertionError();
     }
 
     @Shadow
-    private static void gatherStats(EnchantmentTableStats.Builder builder, LevelReader level, BlockPos pos) {
+    public static void gatherStats(EnchantmentTableStats.Builder builder, LevelReader level, BlockPos pos) {
         throw new AssertionError();
     }
 

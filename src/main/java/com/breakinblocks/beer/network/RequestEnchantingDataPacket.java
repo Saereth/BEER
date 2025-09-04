@@ -11,20 +11,21 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
 
 public record RequestEnchantingDataPacket(BlockPos pos) implements CustomPacketPayload {
 
     public static final Type<RequestEnchantingDataPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("beer", "request_enchanting_data"));
 
-    public static final StreamCodec<ByteBuf, RequestEnchantingDataPacket> STREAM_CODEC = new StreamCodec<ByteBuf, RequestEnchantingDataPacket>() {
+    public static final StreamCodec<ByteBuf, RequestEnchantingDataPacket> STREAM_CODEC = new StreamCodec<>() {
         @Override
-        public RequestEnchantingDataPacket decode(ByteBuf buffer) {
+        public @NotNull RequestEnchantingDataPacket decode(@NotNull ByteBuf buffer) {
             BlockPos pos = BlockPos.STREAM_CODEC.decode(buffer);
             return new RequestEnchantingDataPacket(pos);
         }
 
         @Override
-        public void encode(ByteBuf buffer, RequestEnchantingDataPacket packet) {
+        public void encode(@NotNull ByteBuf buffer, RequestEnchantingDataPacket packet) {
             BlockPos.STREAM_CODEC.encode(buffer, packet.pos());
         }
     };

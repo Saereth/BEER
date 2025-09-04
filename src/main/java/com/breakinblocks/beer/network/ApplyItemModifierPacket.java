@@ -3,13 +3,10 @@ package com.breakinblocks.beer.network;
 import com.breakinblocks.beer.event.ItemModifierHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+
 import net.minecraft.util.ByIdMap;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -28,7 +25,7 @@ public record ApplyItemModifierPacket(
 
     public static final Type<ApplyItemModifierPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("beer", "apply_item_modifier"));
 
-    public static final StreamCodec<ByteBuf, ApplyItemModifierPacket> STREAM_CODEC = new StreamCodec<ByteBuf, ApplyItemModifierPacket>() {
+    public static final StreamCodec<ByteBuf, ApplyItemModifierPacket> STREAM_CODEC = new StreamCodec<>() {
         @Override
         public ApplyItemModifierPacket decode(ByteBuf buffer) {
             BlockPos pos = BlockPos.STREAM_CODEC.decode(buffer);

@@ -28,7 +28,7 @@ public class BeerMixinPlugin implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (mixinClassName.contains("TableStatsMixin")) {
-            return isModLoaded(APOTHIC_ENCHANTING_MOD_ID);
+            return isModLoaded();
         }
         return true;
     }
@@ -57,27 +57,26 @@ public class BeerMixinPlugin implements IMixinConfigPlugin {
     /**
      * Check if a mod is loaded using the appropriate method based on loading stage
      */
-    private boolean isModLoaded(String modId) {
+    private boolean isModLoaded() {
         try {
-            // First try using FMLLoader's mod container list (available earlier)
-            if (FMLLoader.getLoadingModList().getModFileById(modId) != null) {
-                LOGGER.debug("Found {} in FMLLoader mod list", modId);
+            if (FMLLoader.getLoadingModList().getModFileById(BeerMixinPlugin.APOTHIC_ENCHANTING_MOD_ID) != null) {
+                LOGGER.debug("Found {} in FMLLoader mod list", BeerMixinPlugin.APOTHIC_ENCHANTING_MOD_ID);
                 return true;
             }
             
             // Fallback to ModList if available
             try {
-                boolean isLoaded = ModList.get().isLoaded(modId);
-                LOGGER.debug("ModList check for {}: {}", modId, isLoaded);
+                boolean isLoaded = ModList.get().isLoaded(BeerMixinPlugin.APOTHIC_ENCHANTING_MOD_ID);
+                LOGGER.debug("ModList check for {}: {}", BeerMixinPlugin.APOTHIC_ENCHANTING_MOD_ID, isLoaded);
                 return isLoaded;
             } catch (Exception e) {
-                LOGGER.debug("ModList not available yet, checking FMLLoader for {}", modId);
+                LOGGER.debug("ModList not available yet, checking FMLLoader for {}", BeerMixinPlugin.APOTHIC_ENCHANTING_MOD_ID);
             }
             
-            LOGGER.debug("Mod {} not found in available mod lists", modId);
+            LOGGER.debug("Mod {} not found in available mod lists", BeerMixinPlugin.APOTHIC_ENCHANTING_MOD_ID);
             return false;
         } catch (Exception e) {
-            LOGGER.warn("Error checking if mod {} is loaded: {}", modId, e.getMessage());
+            LOGGER.warn("Error checking if mod {} is loaded: {}", BeerMixinPlugin.APOTHIC_ENCHANTING_MOD_ID, e.getMessage());
             return false;
         }
     }

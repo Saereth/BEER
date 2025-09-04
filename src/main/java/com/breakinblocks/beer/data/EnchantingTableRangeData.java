@@ -85,7 +85,7 @@ public class EnchantingTableRangeData implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public CompoundTag serializeNBT(HolderLookup.@NotNull Provider provider) {
         CompoundTag tag = new CompoundTag();
         tag.putInt("itemModifiersX", itemModifiersX);
         tag.putInt("itemModifiersY", itemModifiersY);
@@ -111,11 +111,5 @@ public class EnchantingTableRangeData implements INBTSerializable<CompoundTag> {
         this.itemModifiersX = 0;
         this.itemModifiersY = 0;
         this.itemModifiersZ = 0;
-    }
-    
-
-    
-    public void resetAll() {
-        resetToDefaults();
     }
 }
