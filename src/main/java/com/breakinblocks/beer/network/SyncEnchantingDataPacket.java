@@ -2,6 +2,7 @@ package com.breakinblocks.beer.network;
 
 import com.breakinblocks.beer.data.BeerDataAttachments;
 import com.breakinblocks.beer.data.EnchantingTableRangeData;
+import com.breakinblocks.beer.compat.BeerJadePlugin;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -63,8 +64,9 @@ public record SyncEnchantingDataPacket(
             data.setItemModifierY(packet.itemModY());
             data.setItemModifierZ(packet.itemModZ());
             
-            // Set the data on the client-side block entity
             enchantingTable.setData(BeerDataAttachments.ENCHANTING_TABLE_RANGE.get(), data);
+            
+            BeerJadePlugin.clearPendingRequest(packet.pos());
         }
     }
     

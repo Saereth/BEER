@@ -9,7 +9,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-@EventBusSubscriber(modid = Beer.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = Beer.MODID)
 public class NetworkHandler {
     private static final String PROTOCOL_VERSION = "1";
 
@@ -22,6 +22,12 @@ public class NetworkHandler {
             UpdateRangePacket.TYPE,
             UpdateRangePacket.STREAM_CODEC,
             UpdateRangePacket::handle
+        );
+        
+        registrar.playToServer(
+            RequestEnchantingDataPacket.TYPE,
+            RequestEnchantingDataPacket.STREAM_CODEC,
+            RequestEnchantingDataPacket::handle
         );
         
         registrar.playToClient(

@@ -68,8 +68,6 @@ public record ApplyItemModifierPacket(
     }
 
     private static void handleClient(ApplyItemModifierPacket packet, Level level) {
-        // Client-side handling - particles removed
-        // This packet can be used for other client-side effects if needed in the future
     }
 
 

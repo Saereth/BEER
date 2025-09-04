@@ -2,8 +2,9 @@ package com.breakinblocks.beer.data;
 
 import com.breakinblocks.beer.Beer;
 import com.mojang.serialization.Codec;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -22,6 +23,14 @@ public class BeerDataAttachments {
             return java.util.List.of(data.getItemModifiersX(), data.getItemModifiersY(), data.getItemModifiersZ());
         }
     );
+
+    private static final StreamCodec<ByteBuf, EnchantingTableRangeData> RANGE_DATA_STREAM_CODEC =
+        StreamCodec.composite(
+            ByteBufCodecs.INT, EnchantingTableRangeData::getItemModifiersX,
+            ByteBufCodecs.INT, EnchantingTableRangeData::getItemModifiersY, 
+            ByteBufCodecs.INT, EnchantingTableRangeData::getItemModifiersZ,
+            EnchantingTableRangeData::new
+        );
 
     public static final Supplier<AttachmentType<EnchantingTableRangeData>> ENCHANTING_TABLE_RANGE = 
         ATTACHMENT_TYPES.register("enchanting_table_range", () -> 

@@ -11,6 +11,9 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record UpdateRangePacket(BlockPos pos, int rangeX, int rangeY, int rangeZ) implements CustomPacketPayload {
     
+    private static final double MAX_INTERACTION_DISTANCE_SQ = 64.0;
+    private static final double BLOCK_CENTER_OFFSET = 0.5;
+    
     public static final CustomPacketPayload.Type<UpdateRangePacket> TYPE = 
         new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("beer", "update_range"));
 
@@ -30,44 +33,47 @@ public record UpdateRangePacket(BlockPos pos, int rangeX, int rangeY, int rangeZ
 
     public static void handle(UpdateRangePacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
-            System.out.println("[BEER DEBUG] UpdateRangePacket received for position: " + packet.pos());
-            System.out.println("[BEER DEBUG] Ranges: X=" + packet.rangeX() + ", Y=" + packet.rangeY() + ", Z=" + packet.rangeZ());
-            
-            if (context.flow().isServerbound()) {
-                var player = context.player();
-                System.out.println("[BEER DEBUG] Player: " + player);
-                if (player != null && player.level() != null) {
-                    System.out.println("[BEER DEBUG] Checking for enchanting table at: " + packet.pos());
-                    // Validate that the enchanting table exists at the position
-                    if (EnchantingTableDataUtil.hasEnchantingTable(player.level(), packet.pos())) {
-                        System.out.println("[BEER DEBUG] Enchanting table found, checking distance");
-                        // Check if player is within reasonable distance (prevents cheating)
-                        double distance = player.distanceToSqr(packet.pos().getX() + 0.5, packet.pos().getY() + 0.5, packet.pos().getZ() + 0.5);
-                        System.out.println("[BEER DEBUG] Distance: " + distance);
-                        if (distance <= 64.0) { // 8 blocks max distance
-                            System.out.println("[BEER DEBUG] Distance valid, applying ranges");
-                            // Apply ranges directly - validation happens in the data layer
-                            EnchantingTableDataUtil.setRanges(player.level(), packet.pos(), packet.rangeX(), packet.rangeY(), packet.rangeZ());
-                            System.out.println("[BEER DEBUG] Ranges saved successfully");
-                            
-                            // Sync the updated data to nearby clients so Jade displays correctly
-                            if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                                var updatedData = EnchantingTableDataUtil.getRangeData(player.level(), packet.pos());
-                                SyncEnchantingDataPacket syncPacket = SyncEnchantingDataPacket.create(packet.pos(), updatedData);
-                                NetworkHandler.sendToPlayersNear(syncPacket, serverLevel, packet.pos(), 64.0);
-                            }
-                        } else {
-                            System.out.println("[BEER DEBUG] Player too far from enchanting table");
-                        }
-                    } else {
-                        System.out.println("[BEER DEBUG] No enchanting table found at position");
-                    }
-                } else {
-                    System.out.println("[BEER DEBUG] Player or level is null");
-                }
-            } else {
-                System.out.println("[BEER DEBUG] Packet is not serverbound");
+            if (!context.flow().isServerbound()) {
+                return;
             }
+            
+            var player = context.player();
+            if (!isValidContext(player)) {
+                return;
+            }
+            
+            if (!EnchantingTableDataUtil.hasEnchantingTable(player.level(), packet.pos())) {
+                return;
+            }
+            
+            if (!isPlayerInRange(player, packet.pos())) {
+                return;
+            }
+            
+            updateRangeData(packet, player);
         });
+    }
+    
+    private static boolean isValidContext(net.minecraft.world.entity.player.Player player) {
+        return player != null && player.level() != null;
+    }
+    
+    private static boolean isPlayerInRange(net.minecraft.world.entity.player.Player player, BlockPos pos) {
+        double distance = player.distanceToSqr(
+            pos.getX() + BLOCK_CENTER_OFFSET,
+            pos.getY() + BLOCK_CENTER_OFFSET,
+            pos.getZ() + BLOCK_CENTER_OFFSET
+        );
+        return distance <= MAX_INTERACTION_DISTANCE_SQ;
+    }
+    
+    private static void updateRangeData(UpdateRangePacket packet, net.minecraft.world.entity.player.Player player) {
+        EnchantingTableDataUtil.setRanges(player.level(), packet.pos(), packet.rangeX(), packet.rangeY(), packet.rangeZ());
+        
+        if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            var updatedData = EnchantingTableDataUtil.getRangeData(player.level(), packet.pos());
+            SyncEnchantingDataPacket syncPacket = SyncEnchantingDataPacket.create(packet.pos(), updatedData);
+            NetworkHandler.sendToPlayersNear(syncPacket, serverLevel, packet.pos(), MAX_INTERACTION_DISTANCE_SQ);
+        }
     }
 }

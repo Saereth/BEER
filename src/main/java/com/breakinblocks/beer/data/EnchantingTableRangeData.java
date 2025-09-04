@@ -4,6 +4,7 @@ import com.breakinblocks.beer.Config;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.NotNull;
 
 public class EnchantingTableRangeData implements INBTSerializable<CompoundTag> {
     private int itemModifiersX;
@@ -36,17 +37,14 @@ public class EnchantingTableRangeData implements INBTSerializable<CompoundTag> {
     }
     
     public int getEffectiveRangeX() {
-        // Vanilla X range is 2 (-2 to +2), add item modifiers (minimum 0 when itemMod = -2)
         return Math.max(0, 2 + itemModifiersX);
     }
     
     public int getEffectiveRangeY() {
-        // Vanilla Y range is 1 (0 to +1), add item modifiers (minimum 0 when itemMod = -1)
         return Math.max(0, 1 + itemModifiersY);
     }
     
     public int getEffectiveRangeZ() {
-        // Vanilla Z range is 2 (-2 to +2), add item modifiers (minimum 0 when itemMod = -2)
         return Math.max(0, 2 + itemModifiersZ);
     }
 
@@ -75,17 +73,14 @@ public class EnchantingTableRangeData implements INBTSerializable<CompoundTag> {
     }
 
     private int clampItemModifierX(int modifier) {
-        // X can go from -2 to +maxItemModifiersPerAxis
         return Math.max(-2, Math.min(modifier, Config.maxItemModifiersPerAxis));
     }
     
     private int clampItemModifierY(int modifier) {
-        // Y can go from -1 to +maxItemModifiersPerAxis
         return Math.max(-1, Math.min(modifier, Config.maxItemModifiersPerAxis));
     }
     
     private int clampItemModifierZ(int modifier) {
-        // Z can go from -2 to +maxItemModifiersPerAxis
         return Math.max(-2, Math.min(modifier, Config.maxItemModifiersPerAxis));
     }
 
@@ -99,7 +94,7 @@ public class EnchantingTableRangeData implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
+    public void deserializeNBT(HolderLookup.@NotNull Provider provider, CompoundTag tag) {
         this.itemModifiersX = clampItemModifierX(tag.getInt("itemModifiersX"));
         this.itemModifiersY = clampItemModifierY(tag.getInt("itemModifiersY"));
         this.itemModifiersZ = clampItemModifierZ(tag.getInt("itemModifiersZ"));
