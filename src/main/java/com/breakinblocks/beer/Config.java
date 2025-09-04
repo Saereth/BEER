@@ -1,14 +1,12 @@
 package com.breakinblocks.beer;
 
-import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import org.slf4j.Logger;
 
 
-@EventBusSubscriber(modid = Beer.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = Beer.MODID)
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
