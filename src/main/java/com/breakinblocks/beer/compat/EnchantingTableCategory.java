@@ -30,7 +30,6 @@ import java.util.List;
 public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifierRecipeType> {
     public static final RecipeType<EnchantingModifierRecipeType> TYPE = RecipeType.create("beer", "enchanting_modifiers", EnchantingModifierRecipeType.class);
     
-    // Custom texture for JEI GUI (similar to Apothic Spawners)
     public static final ResourceLocation TEXTURES = ResourceLocation.fromNamespaceAndPath("beer", "textures/gui/enchanting_jei.png");
 
     private final IDrawable background;

@@ -6,7 +6,6 @@ import com.breakinblocks.beer.data.EnchantingTableRangeData;
 import com.breakinblocks.beer.network.ApplyItemModifierPacket;
 import com.breakinblocks.beer.network.NetworkHandler;
 import com.breakinblocks.beer.network.SyncEnchantingDataPacket;
-import com.breakinblocks.beer.util.EnchantingTableDataUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,50 +37,33 @@ public class ItemModifierHandler {
         BlockPos pos = event.getPos();
         InteractionHand hand = event.getHand();
         
-        // Only handle main hand interactions to avoid double processing
         if (hand != InteractionHand.MAIN_HAND) {
             return;
         }
         
-        // Must be shift-clicking
         if (!player.isShiftKeyDown()) {
             return;
         }
         
-        // Must be clicking an enchanting table
         if (!level.getBlockState(pos).is(Blocks.ENCHANTING_TABLE)) {
             return;
         }
         
         ItemStack heldItem = player.getItemInHand(hand);
         ItemStack offhandItem = player.getOffhandItem();
+
         
-        // Check for reset command (stick)
-        if (heldItem.is(Items.STICK)) {
-            if (!level.isClientSide()) {
-                EnchantingTableDataUtil.forceResetAll(level, pos);
-                level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 1.0F, 0.8F);
-                System.out.println("[BEER DEBUG] Reset enchanting table data to defaults");
-            }
-            event.setCanceled(true);
-            return;
-        }
-        
-        // Determine modifier type based on held item
         ModifierType modifierType = getModifierType(heldItem);
         if (modifierType == null) {
             return;
         }
         
-        // Check if nether quartz is in offhand (decrease mode)
         boolean decreaseMode = offhandItem.is(Items.QUARTZ);
         
-        // On server side, apply the modification
         if (!level.isClientSide()) {
             applyModification(level, pos, player, modifierType, decreaseMode, heldItem);
         }
         
-        // Cancel the interaction to prevent opening the enchanting table GUI
         event.setCanceled(true);
     }
     
@@ -102,13 +84,8 @@ public class ItemModifierHandler {
             return;
         }
         
-        // Get or create enchanting table data
         EnchantingTableRangeData data = blockEntity.getData(BeerDataAttachments.ENCHANTING_TABLE_RANGE.get());
-        if (data == null) {
-            data = new EnchantingTableRangeData();
-            blockEntity.setData(BeerDataAttachments.ENCHANTING_TABLE_RANGE.get(), data);
-        }
-        
+
         int modifierAmount = Config.modifierAmountPerUse;
         if (decreaseMode) {
             modifierAmount = -modifierAmount;
@@ -150,27 +127,21 @@ public class ItemModifierHandler {
         System.out.println("[BEER DEBUG] Modification success: " + success);
         
         if (success) {
-            // Handle XP costs if enabled
             if (Config.enableXpCosts) {
                 int xpCost = Config.xpCostPerModifier;
                 if (decreaseMode) {
-                    // Decreasing gives XP back
                     player.giveExperiencePoints(xpCost);
                     
-                    // Show XP gained message in action bar
                     if (player instanceof ServerPlayer serverPlayer) {
                         Component xpGainMessage = Component.translatable("beer.message.xp_gained", xpCost)
                                 .withStyle(net.minecraft.ChatFormatting.GREEN);
                         serverPlayer.sendSystemMessage(xpGainMessage, true);
                     }
                 } else {
-                    // Increasing costs XP - check if player has enough
                     int totalXp = getTotalExperience(player);
                     if (totalXp < xpCost && !player.getAbilities().instabuild) {
-                        // Not enough XP - play failure sound and show message
                         level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
                         
-                        // Send action bar message about XP requirement
                         if (player instanceof ServerPlayer serverPlayer) {
                             Component xpMessage = Component.translatable("beer.message.insufficient_xp", xpCost, totalXp)
                                     .withStyle(net.minecraft.ChatFormatting.RED);
@@ -178,14 +149,12 @@ public class ItemModifierHandler {
                             NetworkHandler.sendToPlayer(new ApplyItemModifierPacket(pos, modifierType, true, false, 
                                 0, 0, 0), serverPlayer);
                         }
-                        return; // Exit without applying changes
+                        return;
                     }
-                    // Take XP from player
                     if (!player.getAbilities().instabuild) {
                         addExperience(player, -xpCost);
                     }
                     
-                    // Show XP consumed message in action bar
                     if (player instanceof ServerPlayer serverPlayer) {
                         Component xpConsumedMessage = Component.translatable("beer.message.xp_consumed", xpCost)
                                 .withStyle(net.minecraft.ChatFormatting.YELLOW);
@@ -194,33 +163,26 @@ public class ItemModifierHandler {
                 }
             }
             
-            // Mark the block entity as dirty to save data
             blockEntity.setChanged();
             
-            // Consume item if configured to do so
             if (Config.consumeItems && !player.getAbilities().instabuild) {
                 heldItem.shrink(1);
             }
             
-            // Play success sound
             level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 1.0F, 1.2F);
             
-            // Send success packet to client for visual effects
             if (player instanceof ServerPlayer serverPlayer) {
                 NetworkHandler.sendToPlayer(new ApplyItemModifierPacket(pos, modifierType, !decreaseMode, true, 
                     data.getEffectiveRangeX(), data.getEffectiveRangeY(), data.getEffectiveRangeZ()), serverPlayer);
             }
             
-            // Sync the updated data to nearby clients so Jade displays correctly
             if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 SyncEnchantingDataPacket syncPacket = SyncEnchantingDataPacket.create(pos, data);
                 NetworkHandler.sendToPlayersNear(syncPacket, serverLevel, pos, 64.0);
             }
         } else {
-            // Play failure sound
             level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
             
-            // Send failure packet to client
             if (player instanceof ServerPlayer serverPlayer) {
                 NetworkHandler.sendToPlayer(new ApplyItemModifierPacket(pos, modifierType, !decreaseMode, false, 
                     0, 0, 0), serverPlayer);
@@ -233,17 +195,14 @@ public class ItemModifierHandler {
     }
     
     private static boolean isValidModifierX(int modifier) {
-        // X can go from -2 to +maxItemModifiersPerAxis
         return modifier >= -2 && modifier <= Config.maxItemModifiersPerAxis;
     }
     
     private static boolean isValidModifierY(int modifier) {
-        // Y can go from -1 to +maxItemModifiersPerAxis
         return modifier >= -1 && modifier <= Config.maxItemModifiersPerAxis;
     }
     
     private static boolean isValidModifierZ(int modifier) {
-        // Z can go from -2 to +maxItemModifiersPerAxis
         return modifier >= -2 && modifier <= Config.maxItemModifiersPerAxis;
     }
     
@@ -255,7 +214,6 @@ public class ItemModifierHandler {
         return effectiveRange >= 0 && effectiveRange <= maxAllowed;
     }
     
-    // XP utility methods
     private static int getTotalExperience(Player player) {
         return (int)(getExperienceForLevel(player.experienceLevel) + (player.experienceProgress * player.getXpNeededForNextLevel()));
     }
@@ -274,7 +232,6 @@ public class ItemModifierHandler {
         int totalXp = getTotalExperience(player) + xp;
         player.totalExperience = totalXp;
         
-        // Set level and progress based on total XP
         if (totalXp <= 0) {
             player.experienceLevel = 0;
             player.experienceProgress = 0.0f;
