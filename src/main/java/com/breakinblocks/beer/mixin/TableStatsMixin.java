@@ -8,8 +8,10 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.EnchantingTableBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
 
+@Pseudo
 @Mixin(EnchantmentTableStats.class)
 public abstract class TableStatsMixin {
 

@@ -4,7 +4,6 @@
   "package": "com.breakinblocks.beer.mixin",
   "compatibilityLevel": "JAVA_8",
   "refmap": "beer.refmap.json",
-  "plugin": "com.breakinblocks.beer.mixin.BeerMixinPlugin",
   "mixins": [
     "EnchantmentMenuMixin",
     "TableStatsMixin"
