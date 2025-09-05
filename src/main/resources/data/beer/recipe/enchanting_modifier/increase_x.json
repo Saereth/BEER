@@ -1,9 +1,0 @@
-{
-  "type": "beer:enchanting_modifier",
-  "mainhand_input": {
-    "item": "minecraft:redstone"
-  },
-  "effect_key": "+X Width",
-  "description_key": "beer.jei.modifier.x_width.description",
-  "modifier_type": "X_WIDTH"
-}
