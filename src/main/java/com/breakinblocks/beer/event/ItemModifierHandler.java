@@ -6,6 +6,9 @@ import com.breakinblocks.beer.data.EnchantingTableRangeData;
 import com.breakinblocks.beer.network.ApplyItemModifierPacket;
 import com.breakinblocks.beer.network.NetworkHandler;
 import com.breakinblocks.beer.network.SyncEnchantingDataPacket;
+import com.breakinblocks.beer.recipe.BeerRecipes;
+import com.breakinblocks.beer.recipe.EnchantingModifierRecipeType;
+import com.breakinblocks.beer.compat.EnchantingModifierRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,12 +56,12 @@ public class ItemModifierHandler {
         ItemStack offhandItem = player.getOffhandItem();
 
         
-        ModifierType modifierType = getModifierType(heldItem);
+        ModifierType modifierType = getModifierType(level, heldItem, offhandItem);
         if (modifierType == null) {
             return;
         }
         
-        boolean decreaseMode = offhandItem.is(Items.QUARTZ);
+        boolean decreaseMode = isDecreaseMode(level, heldItem, offhandItem);
         
         if (!level.isClientSide()) {
             applyModification(level, pos, player, modifierType, decreaseMode, heldItem);
@@ -67,15 +70,90 @@ public class ItemModifierHandler {
         event.setCanceled(true);
     }
     
-    private static ModifierType getModifierType(ItemStack stack) {
-        if (stack.is(Items.REDSTONE)) {
-            return ModifierType.X_WIDTH;
-        } else if (stack.is(Items.GLOWSTONE_DUST)) {
-            return ModifierType.Z_WIDTH;
-        } else if (stack.is(Items.LAPIS_LAZULI)) {
-            return ModifierType.Y_HEIGHT;
+    private static ModifierType getModifierType(Level level, ItemStack mainhandStack, ItemStack offhandStack) {
+        if (level.isClientSide()) {
+            return null; // Don't process on client side
         }
+        
+        try {
+            var recipeManager = level.getRecipeManager();
+            var recipeType = BeerRecipes.ENCHANTING_MODIFIER_TYPE.get();
+            
+            if (recipeManager == null || recipeType == null) {
+                return null;
+            }
+            
+            var allRecipes = recipeManager.getAllRecipesFor(recipeType);
+            
+            for (var recipeHolder : allRecipes) {
+                var recipe = recipeHolder.value();
+                
+                if (!recipe.getMainhandInput().test(mainhandStack)) {
+                    continue;
+                }
+                
+                if (recipe.getOffhandInput() != null && !recipe.getOffhandInput().isEmpty()) {
+                    if (offhandStack.isEmpty() || !recipe.getOffhandInput().test(offhandStack)) {
+                        continue;
+                    }
+                }
+                
+                return convertToModifierType(recipe.getModifierType());
+            }
+        } catch (Exception e) {
+            System.err.println("[BEER] Error loading modifier type from recipes: " + e.getMessage());
+        }
+        
         return null;
+    }
+    
+    private static boolean isDecreaseMode(Level level, ItemStack mainhandStack, ItemStack offhandStack) {
+        if (level.isClientSide()) {
+            return false;
+        }
+        
+        try {
+            var recipeManager = level.getRecipeManager();
+            var recipeType = BeerRecipes.ENCHANTING_MODIFIER_TYPE.get();
+            
+            if (recipeManager == null || recipeType == null) {
+                return false;
+            }
+            
+            var allRecipes = recipeManager.getAllRecipesFor(recipeType);
+            
+            for (var recipeHolder : allRecipes) {
+                var recipe = recipeHolder.value();
+                
+                if (!recipe.getMainhandInput().test(mainhandStack)) {
+                    continue;
+                }
+                
+                if (recipe.getOffhandInput() != null && !recipe.getOffhandInput().isEmpty()) {
+                    if (offhandStack.isEmpty() || !recipe.getOffhandInput().test(offhandStack)) {
+                        continue;
+                    }
+                    return recipe.getEffectKey().startsWith("-");
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[BEER] Error checking decrease mode from recipes: " + e.getMessage());
+        }
+        
+        return false;
+    }
+    
+    private static ModifierType convertToModifierType(EnchantingModifierRecipe.ModifierType recipeType) {
+        switch (recipeType) {
+            case X_WIDTH:
+                return ModifierType.X_WIDTH;
+            case Y_HEIGHT:
+                return ModifierType.Y_HEIGHT;
+            case Z_WIDTH:
+                return ModifierType.Z_WIDTH;
+            default:
+                return null;
+        }
     }
     
     private static void applyModification(Level level, BlockPos pos, Player player, ModifierType modifierType, boolean decreaseMode, ItemStack heldItem) {
@@ -91,10 +169,7 @@ public class ItemModifierHandler {
             modifierAmount = -modifierAmount;
         }
         
-        // Apply the modification based on type
         boolean success = false;
-        System.out.println("[BEER DEBUG] Before modification - Item mods: X=" + data.getItemModifiersX() + ", Y=" + data.getItemModifiersY() + ", Z=" + data.getItemModifiersZ());
-        System.out.println("[BEER DEBUG] Modifier type: " + modifierType + ", Amount: " + modifierAmount);
         
         switch (modifierType) {
             case X_WIDTH:
@@ -102,9 +177,6 @@ public class ItemModifierHandler {
                 if (isValidModifierX(newX)) {
                     data.addItemModifierX(modifierAmount);
                     success = true;
-                    System.out.println("[BEER DEBUG] X_WIDTH modification successful");
-                } else {
-                    System.out.println("[BEER DEBUG] X_WIDTH modification failed - valid modifier: " + isValidModifierX(newX));
                 }
                 break;
             case Z_WIDTH:
@@ -122,9 +194,6 @@ public class ItemModifierHandler {
                 }
                 break;
         }
-        
-        System.out.println("[BEER DEBUG] After modification - Item mods: X=" + data.getItemModifiersX() + ", Y=" + data.getItemModifiersY() + ", Z=" + data.getItemModifiersZ());
-        System.out.println("[BEER DEBUG] Modification success: " + success);
         
         if (success) {
             if (Config.enableXpCosts) {

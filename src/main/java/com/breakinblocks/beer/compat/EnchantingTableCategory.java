@@ -27,10 +27,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.breakinblocks.beer.Beer.rl;
+
 public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifierRecipeType> {
     public static final RecipeType<EnchantingModifierRecipeType> TYPE = RecipeType.create("beer", "enchanting_modifiers", EnchantingModifierRecipeType.class);
     
-    public static final ResourceLocation TEXTURES = ResourceLocation.fromNamespaceAndPath("beer", "textures/gui/enchanting_jei.png");
+    public static final ResourceLocation TEXTURES = rl("textures/gui/enchanting_jei.png");
 
     private final IDrawable background;
     private final IDrawable icon;

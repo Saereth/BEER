@@ -119,13 +119,11 @@ public class EnchantingModifierRecipeType implements Recipe<RecipeInput> {
 
         @Override
         public MapCodec<EnchantingModifierRecipeType> codec() {
-            com.mojang.logging.LogUtils.getLogger().info("[BEER] EnchantingModifierRecipeType codec() called");
             return CODEC;
         }
 
         @Override
         public StreamCodec<RegistryFriendlyByteBuf, EnchantingModifierRecipeType> streamCodec() {
-            com.mojang.logging.LogUtils.getLogger().info("[BEER] EnchantingModifierRecipeType streamCodec() called");
             return STREAM_CODEC;
         }
     }

@@ -5,13 +5,14 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 
 import net.minecraft.util.ByIdMap;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.IntFunction;
+
+import static com.breakinblocks.beer.Beer.rl;
 
 public record ApplyItemModifierPacket(
         BlockPos pos,
@@ -23,7 +24,7 @@ public record ApplyItemModifierPacket(
         int rangeZ
 ) implements CustomPacketPayload {
 
-    public static final Type<ApplyItemModifierPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("beer", "apply_item_modifier"));
+    public static final Type<ApplyItemModifierPacket> TYPE = new Type<>(rl("apply_item_modifier"));
 
     public static final StreamCodec<ByteBuf, ApplyItemModifierPacket> STREAM_CODEC = new StreamCodec<>() {
         @Override
