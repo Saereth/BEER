@@ -6,10 +6,11 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
+
+import static com.breakinblocks.beer.Beer.rl;
 
 public record UpdateRangePacket(BlockPos pos, int rangeX, int rangeY, int rangeZ) implements CustomPacketPayload {
     
@@ -17,7 +18,7 @@ public record UpdateRangePacket(BlockPos pos, int rangeX, int rangeY, int rangeZ
     private static final double BLOCK_CENTER_OFFSET = 0.5;
     
     public static final CustomPacketPayload.Type<UpdateRangePacket> TYPE = 
-        new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("beer", "update_range"));
+        new CustomPacketPayload.Type<>(rl("update_range"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, UpdateRangePacket> STREAM_CODEC = 
         StreamCodec.composite(

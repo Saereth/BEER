@@ -7,11 +7,12 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+
+import static com.breakinblocks.beer.Beer.rl;
 
 public record SyncEnchantingDataPacket(
         BlockPos pos,
@@ -20,7 +21,7 @@ public record SyncEnchantingDataPacket(
         int itemModZ
 ) implements CustomPacketPayload {
 
-    public static final Type<SyncEnchantingDataPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("beer", "sync_enchanting_data"));
+    public static final Type<SyncEnchantingDataPacket> TYPE = new Type<>(rl("sync_enchanting_data"));
 
     public static final StreamCodec<ByteBuf, SyncEnchantingDataPacket> STREAM_CODEC = new StreamCodec<ByteBuf, SyncEnchantingDataPacket>() {
         @Override

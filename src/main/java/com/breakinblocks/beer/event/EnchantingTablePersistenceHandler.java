@@ -88,6 +88,9 @@ public class EnchantingTablePersistenceHandler {
             return;
         }
 
+        if (event.getPlayer().getAbilities().instabuild) {
+            return;
+        }
         EnchantingTableRangeData data = EnchantingTableDataUtil.getRangeData(level, pos);
 
         if (!data.hasItemModifications()) {
