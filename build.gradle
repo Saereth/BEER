@@ -126,7 +126,7 @@ dependencies {
     if (project.hasProperty('attributeslibVersion'))    implementation          "dev.shadowsoffire:ApothicAttributes:${minecraft_version}-${attributeslibVersion}"
     if (project.hasProperty('apothicenchantVersion'))   implementation          "dev.shadowsoffire:ApothicEnchanting:${minecraft_version}-${apothicenchantVersion}"
     if (project.hasProperty('jadeVersion'))             implementation          "snownee.jade:Jade-NeoForge:${minecraft_version}-${jadeVersion}"
-    if (project.hasProperty('jeiVersion'))              compileOnly          "mezz.jei:jei-${minecraft_version}-neoforge:${jeiVersion}"
+    if (project.hasProperty('jeiVersion'))              implementation          "mezz.jei:jei-${minecraft_version}-neoforge:${jeiVersion}"
 }
 
 
