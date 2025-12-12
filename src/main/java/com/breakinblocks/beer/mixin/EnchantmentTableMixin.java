@@ -12,7 +12,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -55,13 +54,14 @@ public class EnchantmentTableMixin {
     }
 
     /**
-     * @author BEER
-     * @reason Skip the intermediate block check for extended range bookshelves.
-     *         Only check if the target position has enchant power bonus.
+     * Skip the intermediate block check for extended range bookshelves.
+     * Vanilla checks if block at (x/2, y, z/2) is air-like, which fails for distances > 2.
+     * We simply check if the target position has enchant power bonus.
      */
-    @Overwrite
-    public static boolean isValidBookShelf(Level level, BlockPos tablePos, BlockPos offset) {
-        // Simply check if the block at the offset position provides enchant power
-        return level.getBlockState(tablePos.offset(offset)).getEnchantPowerBonus(level, tablePos.offset(offset)) > 0;
+    @Inject(method = "isValidBookShelf", at = @At("HEAD"), cancellable = true)
+    private static void onIsValidBookShelf(Level level, BlockPos tablePos, BlockPos offset, CallbackInfoReturnable<Boolean> cir) {
+        BlockPos targetPos = tablePos.offset(offset);
+        boolean hasEnchantPower = level.getBlockState(targetPos).getEnchantPowerBonus(level, targetPos) > 0;
+        cir.setReturnValue(hasEnchantPower);
     }
 }
