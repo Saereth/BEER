@@ -2,16 +2,19 @@ package com.breakinblocks.beer.mixin;
 
 import com.breakinblocks.beer.BeerConfig;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EnchantmentTableBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -20,15 +23,6 @@ import java.util.List;
 public class EnchantmentTableMixin {
     @Shadow @Final @Mutable
     public static List<BlockPos> BOOKSHELF_OFFSETS;
-
-    @Inject(method = "<clinit>", at = @At("TAIL"))
-    private static void modifyBookshelfOffsets(CallbackInfo ci) {
-        // Set to default values, or leave as-is
-        BOOKSHELF_OFFSETS = BlockPos.betweenClosedStream(-2, -2, -2, 2, 2, 2)
-                .filter(blockPos -> Math.abs(blockPos.getX()) > 1 || Math.abs(blockPos.getZ()) > 1)
-                .map(BlockPos::immutable)
-                .toList();
-    }
 
     private static void updateBookshelfOffsetsFromConfig() {
         int rangeX = BeerConfig.getRangeX();
@@ -40,8 +34,8 @@ public class EnchantmentTableMixin {
                 .toList();
     }
 
-    @Inject(method = "newBlockEntity", at = @At("HEAD"))
-    private void onPlaceInject(BlockPos p_153186_, BlockState p_153187_, CallbackInfoReturnable<BlockEntity> cir) {
+    @Inject(method = "use", at = @At("HEAD"))
+    private void onUseInject(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
         updateBookshelfOffsetsFromConfig();
     }
 }
