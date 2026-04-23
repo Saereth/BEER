@@ -27,7 +27,7 @@ public abstract class TableStatsMixin {
 
     /**
      * @author TheonlyTazz
-     * @reason Use custom bookshelf offsets from BookshelfOffsetUtil instead of default EnchantingTableBlock.BOOKSHELF_OFFSETS
+     * @reason Use BEER's configurable bookshelf offsets instead of vanilla's fixed list
      */
     @Overwrite
     public static EnchantmentTableStats gatherStats(LevelReader level, BlockPos pos, int itemEnch) {
@@ -49,5 +49,4 @@ public abstract class TableStatsMixin {
 
         return builder.build();
     }
-
 }
