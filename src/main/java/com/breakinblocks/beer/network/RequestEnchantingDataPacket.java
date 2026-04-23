@@ -44,8 +44,6 @@ public record RequestEnchantingDataPacket(BlockPos pos) implements CustomPacketP
                 
                 if (blockEntity instanceof EnchantingTableBlockEntity) {
                     EnchantingTableRangeData data = EnchantingTableDataUtil.getRangeData(level, packet.pos());
-                    
-                    // Send the data back to the requesting player
                     SyncEnchantingDataPacket syncPacket = SyncEnchantingDataPacket.create(packet.pos(), data);
                     NetworkHandler.sendToPlayer(syncPacket, serverPlayer);
                 }

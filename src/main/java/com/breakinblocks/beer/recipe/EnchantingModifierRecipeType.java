@@ -73,6 +73,11 @@ public class EnchantingModifierRecipeType implements Recipe<RecipeInput> {
     }
 
     @Override
+    public boolean isSpecial() {
+        return true;
+    }
+
+    @Override
     public boolean showNotification() {
         return false;
     }

@@ -11,39 +11,39 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
-import static com.breakinblocks.beer.Beer.rl;
+import java.util.List;
 
 public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifierRecipeType> {
     public static final IRecipeType<EnchantingModifierRecipeType> TYPE =
         IRecipeType.create("beer", "enchanting_modifiers", EnchantingModifierRecipeType.class);
 
-    public static final Identifier TEXTURES = rl("textures/gui/enchanting_jei.png");
+    private static final int WIDTH = 168;
+    private static final int HEIGHT = 80;
 
-    private static final int WIDTH = 169;
-    private static final int HEIGHT = 75;
+    private static final int MAIN_SLOT_X = 8;
+    private static final int MAIN_SLOT_Y = 8;
+    private static final int OFF_SLOT_X = 8;
+    private static final int OFF_SLOT_Y = 56;
+    private static final int TABLE_X = 40;
+    private static final int TABLE_Y = 32;
+    private static final int LABEL_X = 30;
+    private static final int ARROW_X = 62;
 
     private final IDrawable background;
     private final IDrawable icon;
-    private final IDrawable bgSheet;
-    private final IDrawable singleInputOverlay;
-    private final IDrawable tableIcon;
-    private final IDrawable xpBottleIcon;
     private final Component title;
 
     public EnchantingTableCategory(IGuiHelper helper) {
         this.background = helper.createBlankDrawable(WIDTH, HEIGHT);
         this.icon = helper.createDrawableItemStack(new ItemStack(Blocks.ENCHANTING_TABLE));
-        this.bgSheet = helper.drawableBuilder(TEXTURES, 0, 0, WIDTH, HEIGHT).setTextureSize(256, 256).build();
-        this.singleInputOverlay = helper.drawableBuilder(TEXTURES, 0, 88, 28, 34).setTextureSize(256, 256).build();
-        this.tableIcon = helper.createDrawableItemStack(new ItemStack(Blocks.ENCHANTING_TABLE));
-        this.xpBottleIcon = helper.createDrawableItemStack(new ItemStack(Items.EXPERIENCE_BOTTLE));
         this.title = Component.translatable("beer.jei.category.enchanting_modifiers");
     }
 
@@ -74,12 +74,12 @@ public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifi
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, EnchantingModifierRecipeType recipe, @NotNull IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.INPUT, 11, 11)
-               .add(recipe.getMainhandInput());
+        builder.addSlot(RecipeIngredientRole.INPUT, MAIN_SLOT_X, MAIN_SLOT_Y)
+               .addItemStacks(stacksOf(recipe.getMainhandInput()));
 
         recipe.getOffhandInput().ifPresent(offhand ->
-            builder.addSlot(RecipeIngredientRole.INPUT, 11, 48)
-                   .add(offhand)
+            builder.addSlot(RecipeIngredientRole.INPUT, OFF_SLOT_X, OFF_SLOT_Y)
+                   .addItemStacks(stacksOf(offhand))
         );
 
         builder.addInvisibleIngredients(RecipeIngredientRole.CRAFTING_STATION)
@@ -91,28 +91,70 @@ public class EnchantingTableCategory implements IRecipeCategory<EnchantingModifi
 
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder builder, EnchantingModifierRecipeType recipe, IFocusGroup focuses) {
-        builder.addDrawable(bgSheet, 0, 0);
-        if (recipe.getOffhandInput().isEmpty()) {
-            builder.addDrawable(singleInputOverlay, 1, 31);
+        Component mainHandLabel = Component.translatable("beer.jei.category.main_hand").withStyle(ChatFormatting.DARK_GRAY);
+        builder.addText(mainHandLabel, WIDTH - LABEL_X, 10)
+               .setPosition(LABEL_X, MAIN_SLOT_Y + 4);
+
+        if (recipe.getOffhandInput().isPresent()) {
+            Component offHandLabel = Component.translatable("beer.jei.category.off_hand").withStyle(ChatFormatting.DARK_GRAY);
+            builder.addText(offHandLabel, WIDTH - LABEL_X, 10)
+                   .setPosition(LABEL_X, OFF_SLOT_Y + 4);
+
+            Component notConsumed = Component.translatable("beer.jei.category.not_consumed")
+                .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+            builder.addText(notConsumed, WIDTH - LABEL_X, 10)
+                   .setPosition(LABEL_X, OFF_SLOT_Y + 14);
         }
 
-        builder.addDrawable(tableIcon, 31, 29);
+        builder.addDrawable(makeItemDrawable(new ItemStack(Blocks.ENCHANTING_TABLE)), TABLE_X, TABLE_Y);
+
+        Component instruction = Component.translatable("beer.jei.category.right_click_table")
+            .withStyle(ChatFormatting.DARK_GREEN);
+        builder.addText(instruction, WIDTH - ARROW_X, 10)
+               .setPosition(ARROW_X, TABLE_Y + 4);
 
         Component effectText = Component.literal(recipe.getEffectKey())
-            .withStyle(style -> style.withColor(0xFF000000));
-        builder.addText(effectText, WIDTH, 10).setPosition(0, 34);
+            .withStyle(effectColor(recipe.getModifierType(), recipe.getOffhandInput().isPresent()));
+        builder.addText(effectText, WIDTH - ARROW_X, 10)
+               .setPosition(ARROW_X, TABLE_Y - 10);
+
+        Component description = Component.translatable(recipe.getDescriptionKey()).withStyle(ChatFormatting.GRAY);
+        builder.addText(description, WIDTH - 4, 20)
+               .setPosition(4, HEIGHT - 18);
 
         if (Config.enableXpCosts) {
             boolean isDecrease = recipe.getOffhandInput().isPresent();
-            builder.addDrawable(xpBottleIcon, 75, 50);
-
             Component xpText = isDecrease
                 ? Component.translatable("beer.jei.modifier.xp_gain", Config.xpCostPerModifier)
                     .withStyle(ChatFormatting.GREEN)
                 : Component.translatable("beer.jei.modifier.xp_cost", Config.xpCostPerModifier)
                     .withStyle(ChatFormatting.RED);
-
-            builder.addText(xpText, 60, 10).setPosition(95, 54);
+            builder.addText(xpText, WIDTH - ARROW_X, 10)
+                   .setPosition(ARROW_X, TABLE_Y + 18);
         }
+    }
+
+    private static ChatFormatting effectColor(EnchantingModifierRecipe.ModifierType type, boolean decrease) {
+        if (decrease) return ChatFormatting.YELLOW;
+        return switch (type) {
+            case X_WIDTH -> ChatFormatting.RED;
+            case Y_HEIGHT -> ChatFormatting.GREEN;
+            case Z_WIDTH -> ChatFormatting.BLUE;
+            default -> ChatFormatting.WHITE;
+        };
+    }
+
+    private static IDrawable makeItemDrawable(ItemStack stack) {
+        return new IDrawable() {
+            @Override public int getWidth() { return 16; }
+            @Override public int getHeight() { return 16; }
+            @Override public void draw(GuiGraphicsExtractor gfx, int x, int y) {
+                gfx.fakeItem(stack, x, y);
+            }
+        };
+    }
+
+    private static List<ItemStack> stacksOf(Ingredient ingredient) {
+        return ingredient.items().map(ItemStack::new).toList();
     }
 }

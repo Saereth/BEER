@@ -9,8 +9,10 @@ import com.breakinblocks.beer.network.ApplyItemModifierPacket;
 import com.breakinblocks.beer.network.NetworkHandler;
 import com.breakinblocks.beer.network.SyncEnchantingDataPacket;
 import com.breakinblocks.beer.recipe.BeerRecipes;
+import com.breakinblocks.beer.util.BookshelfOffsetUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,6 +57,16 @@ public class ItemModifierHandler {
 
         ItemStack heldItem = player.getItemInHand(hand);
         ItemStack offhandItem = player.getOffhandItem();
+
+        if (heldItem.isEmpty() && offhandItem.isEmpty()) {
+            if (level.isClientSide()) {
+                visualizeRangeClient(level, pos);
+            } else {
+                level.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.6F, 1.2F);
+            }
+            event.setCanceled(true);
+            return;
+        }
 
         ModifierType modifierType = getModifierType(level, heldItem, offhandItem);
         if (modifierType == null) {
@@ -101,8 +113,7 @@ public class ItemModifierHandler {
 
                 return convertToModifierType(recipe.getModifierType());
             }
-        } catch (Exception e) {
-            System.err.println("[BEER] Error loading modifier type from recipes: " + e.getMessage());
+        } catch (Exception ignored) {
         }
 
         return null;
@@ -138,8 +149,7 @@ public class ItemModifierHandler {
                     return recipe.getEffectKey().startsWith("-");
                 }
             }
-        } catch (Exception e) {
-            System.err.println("[BEER] Error checking decrease mode from recipes: " + e.getMessage());
+        } catch (Exception ignored) {
         }
 
         return false;
@@ -316,4 +326,17 @@ public class ItemModifierHandler {
         Z_WIDTH,
         Y_HEIGHT
     }
+
+    private static void visualizeRangeClient(Level level, BlockPos tablePos) {
+        for (BlockPos offset : BookshelfOffsetUtil.getOffsetsForTable(level, tablePos)) {
+            double x = tablePos.getX() + offset.getX() + 0.5;
+            double y = tablePos.getY() + offset.getY() + 0.5;
+            double z = tablePos.getZ() + offset.getZ() + 0.5;
+            level.addParticle(ParticleTypes.END_ROD, x, y, z, 0.0, 0.0, 0.0);
+        }
+    }
 }
+
+
+
+
