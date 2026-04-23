@@ -3,9 +3,10 @@ plugins {
     id 'maven-publish'
     id 'idea'
     id 'net.neoforged.moddev' version '2.0.89'
+    id 'me.modmuss50.mod-publish-plugin' version '1.1.0'
 }
 
-version = mod_version
+version = "${minecraft_version}-${mod_version}"
 group = mod_group_id
 
 repositories {
@@ -40,7 +41,7 @@ repositories {
 }
 
 base {
-    archivesName = "${mod_id}-${minecraft_version}"
+    archivesName = mod_id
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -158,7 +159,14 @@ publishing {
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            name = "BreakInBlocks"
+            url = version.toString().endsWith("-SNAPSHOT") ?
+                "https://maven.breakinblocks.com/snapshots" :
+                "https://maven.breakinblocks.com/releases"
+            credentials {
+                username = System.getenv("MAVEN_USER") ?: ""
+                password = System.getenv("MAVEN_TOKEN") ?: ""
+            }
         }
     }
 }
@@ -168,5 +176,30 @@ idea {
     module {
         downloadSources = true
         downloadJavadoc = true
+    }
+}
+
+// Mod publishing to CurseForge (GitHub releases handled by CI)
+publishMods {
+    file = jar.archiveFile
+    def changelogFile = file("metadata/changelogs/${mod_version}.md")
+    changelog = changelogFile.exists() ? changelogFile.text : "Release ${version}"
+    type = STABLE
+    modLoaders.add("neoforge")
+
+    curseforge {
+        projectId = "1274736"
+        projectSlug = "bookshelf-extended-enchanting-reach"
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        minecraftVersions.add(minecraft_version)
+        optional("jei", "jade", "apothic_enchanting")
+    }
+}
+
+// Include Maven publish when running publishMods
+tasks.named('publishMods') {
+    def mavenUser = providers.environmentVariable("MAVEN_USER")
+    if (mavenUser.isPresent()) {
+        dependsOn 'publishMavenJavaPublicationToBreakInBlocksRepository'
     }
 }
