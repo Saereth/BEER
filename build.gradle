@@ -101,10 +101,10 @@ dependencies {
 
     implementation("curse.maven:jade-324717:${jadeVersion}")
 
-    compileOnly("dev.shadowsoffire:ApothicEnchanting:${apothicenchantVersion}")
-    runtimeOnly("dev.shadowsoffire:Placebo:${placeboVersion}")
-    runtimeOnly("dev.shadowsoffire:ApothicAttributes:${attributeslibVersion}")
-    runtimeOnly("dev.shadowsoffire:ApothicEnchanting:${apothicenchantVersion}")
+    compileOnly("dev.shadowsoffire:ApothicEnchanting:${apothicenchantVersion}") { transitive = false }
+    runtimeOnly("dev.shadowsoffire:Placebo:${placeboVersion}") { transitive = false }
+    runtimeOnly("dev.shadowsoffire:ApothicAttributes:${attributeslibVersion}") { transitive = false }
+    runtimeOnly("dev.shadowsoffire:ApothicEnchanting:${apothicenchantVersion}") { transitive = false }
 }
 
 
