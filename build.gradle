@@ -169,6 +169,8 @@ publishMods {
         projectSlug = "bookshelf-extended-enchanting-reach"
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         minecraftVersions.add(minecraft_version)
+        clientRequired = true
+        serverRequired = true
         optional("jei", "jade", "apothic-enchanting")
     }
 }
